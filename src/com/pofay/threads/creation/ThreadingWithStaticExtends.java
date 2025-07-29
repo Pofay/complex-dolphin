@@ -1,3 +1,5 @@
+package com.pofay.threads.creation;
+
 public class ThreadingWithStaticExtends {
 
     public static void main(String[] args) {

@@ -1,8 +1,5 @@
-/*
- * Copyright (c) 2019-2023. Michael Pogrebinsky - Top Developer Academy
- * https://topdeveloperacademy.com
- * All rights reserved
- */
+package com.pofay.threads.creation;
+
 
 /**
  *  Threads Creation - Part 1, Thread Capabilities & Debugging

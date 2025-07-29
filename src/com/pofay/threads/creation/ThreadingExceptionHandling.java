@@ -1,3 +1,5 @@
+package com.pofay.threads.creation;
+
 public class ThreadingExceptionHandling {
 
     public static void main(String[] args) throws InterruptedException {
