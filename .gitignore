@@ -161,5 +161,6 @@ replay_pid*
 .ionide
 *.iml
 *:Zone.Identifier
+.envrc
 
 # End of https://www.toptal.com/developers/gitignore/api/java,intellij,visualstudiocode
