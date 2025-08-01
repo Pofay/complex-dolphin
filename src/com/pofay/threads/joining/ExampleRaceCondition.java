@@ -3,25 +3,23 @@ package com.pofay.threads.joining;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
-public class BasicJoining {
+public class ExampleRaceCondition {
 
     public static void main(String[] args) {
-        List<Long> inputNumbers = Arrays.asList(0L, 3435L, 35435L, 2324L, 4656L, 23L, 2435L, 5566L);
+        final var inputNumbers = Arrays.asList(0L, 3435L, 35435L, 2324L, 4656L, 23L, 2435L, 5566L);
+        final var factorialThreads = new ArrayList<FactorialThread>();
 
-        List<FactorialThread> factorialThreads = new ArrayList<FactorialThread>();
-
-        for (long inputNumber : inputNumbers) {
+        for (final var inputNumber : inputNumbers) {
             factorialThreads.add(new FactorialThread(inputNumber));
         }
 
-        for (Thread factorialThread : factorialThreads) {
+        for (final var factorialThread : factorialThreads) {
             factorialThread.start();
         }
 
         for (var i = 0; i < inputNumbers.size(); i++) {
-            FactorialThread factorialThread = factorialThreads.get(i);
+            final var factorialThread = factorialThreads.get(i);
             if (factorialThread.isFinished()) {
                 System.out.println("Factorial of " + inputNumbers.get(i) + " is " + factorialThread.getResult());
             } else {
