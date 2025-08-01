@@ -4,25 +4,36 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class ExampleRaceCondition {
+public class ExampleJoinThreads {
 
-    public static void main(String[] args) {
-        final var inputNumbers = Arrays.asList(0L, 3435L, 35435L, 2324L, 4656L, 23L, 5556L);
+    public static void main(String[] args) throws InterruptedException {
+        final var inputNumbers = Arrays.asList(1000000L, 23L, 0L);
         final var factorialThreads = new ArrayList<FactorialThread>();
 
         for (final var inputNumber : inputNumbers) {
             factorialThreads.add(new FactorialThread(inputNumber));
         }
 
-        // A Race happens here because the results of these threads
-        // are competing with the main thread
+        // To resolve the race condition in the previous example
+        // After starting...
         for (final var factorialThread : factorialThreads) {
             factorialThread.start();
         }
 
-        // This is where the threads are competing against the main thread
-        // The main thread can either see the factorial threads as still in progress 
-        // even though its finished or see it finished.
+        // We join the threads back to the main thread
+        for (final var factorialThread: factorialThreads) {
+            // factorialThread.join();
+
+            // In case where computations do take a long time
+            // (Especially for the element with 1000000L)
+            // We can add a timeout for execution in each thread 
+            // If it goes beyond this (2 seconds) then the thread 
+            // terminates and its results back to the main thread.
+            factorialThread.join(2000);
+        }
+
+        // So the main thread can now see the results of each thread
+        // after they have finished executing.
         for (var i = 0; i < inputNumbers.size(); i++) {
             final var factorialThread = factorialThreads.get(i);
             if (factorialThread.isFinished()) {
@@ -31,6 +42,10 @@ public class ExampleRaceCondition {
                 System.out.println("The calculation for " + inputNumbers.get(i) + " is still in progress");
             }
         }
+        // Failsafe, the 1000000L's thread is a normal thread
+        // so even if it rejoins its still alive somewhere
+        // So after the join and all that we just exit.
+        System.exit(0);
     }
 
     private static class FactorialThread extends Thread {
@@ -49,8 +64,8 @@ public class ExampleRaceCondition {
         }
 
         public BigInteger factorial(long n) {
-            var tempResult = BigInteger.ONE;
-            for (var i = n; i > 0; i--) {
+            BigInteger tempResult = BigInteger.ONE;
+            for (long i = n; i > 0; i--) {
                 tempResult = tempResult.multiply(new BigInteger(Long.toString(i)));
             }
             return tempResult;
