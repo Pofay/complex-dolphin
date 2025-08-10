@@ -3,23 +3,25 @@ package com.pofay.threads.imageprocessing;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 
 import javax.imageio.ImageIO;
 
-public class ImageProcessingSequential {
+public class ImageProcessingMultiThreaded {
 
     public static final String SOURCE_FILE = "./resources/many-flowers.jpg";
     public static final String DESTINATION_FILE = "./out/many-flowers.jpg";
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, InterruptedException {
 
         final var originalImage = ImageIO.read(new File(SOURCE_FILE));
         final var resultImage = new BufferedImage(originalImage.getWidth(), originalImage.getHeight(),
                 BufferedImage.TYPE_INT_RGB);
 
         long startTime = System.currentTimeMillis();
+        int numberOfThreads = 6;
 
-        recolorSingleThreaded(originalImage, resultImage);
+        recolorMultiThreaded(originalImage, resultImage, numberOfThreads);
 
         long endTime = System.currentTimeMillis();
         long duration = endTime - startTime;
@@ -30,8 +32,30 @@ public class ImageProcessingSequential {
         System.out.println(String.valueOf(duration));
     }
 
-    public static void recolorSingleThreaded(BufferedImage original, BufferedImage result) {
-        recolorImage(original, result, 0, 0, original.getWidth(), original.getHeight());
+    public static void recolorMultiThreaded(BufferedImage original, BufferedImage result, int numberOfThreads) throws InterruptedException {
+        final var threads = new ArrayList<Thread>();
+        int width = original.getWidth();
+        int height = original.getHeight() / numberOfThreads;
+
+        for (int i = 0; i < numberOfThreads; i++) {
+            final int threadMultiplier = i;
+
+            final var thread = new Thread(() -> {
+                int leftCorner = 0;
+                int topCorner = height * threadMultiplier;
+                recolorImage(original, result, leftCorner, topCorner, width, height);
+            });
+
+            threads.add(thread);
+        }
+
+        for (var thread : threads) {
+            thread.start();
+        }
+
+        for (var thread : threads) {
+            thread.join();
+        }
     }
 
     public static void recolorImage(BufferedImage original, BufferedImage result, int leftCorner, int topCorner,
