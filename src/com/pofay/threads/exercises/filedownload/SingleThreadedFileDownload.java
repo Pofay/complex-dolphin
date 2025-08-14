@@ -10,8 +10,8 @@ import java.net.URISyntaxException;
 public class SingleThreadedFileDownload {
 
     // Main Download logic is from https://www.baeldung.com/java-download-file
-    private static String FILE_URL = "https://cdn.britannica.com/21/75121-050-8CF5E1DB/Bats-structures-organs-sound-frequencies-signals-contexts.jpg";
-    private static String FILE_NAME = "./resources/Bat.jpg";
+    private static String FILE_URL = "https://milkov.tech/assets/psd.pdf";
+    private static String FILE_NAME = "./resources/A Philosophy of Software Design.pdf";
 
     public static void main(String[] args) throws URISyntaxException, IOException {
 
@@ -32,7 +32,7 @@ public class SingleThreadedFileDownload {
 
         try (final var urlInputStream = new BufferedInputStream(url.openStream());
                 final var raf = new RandomAccessFile(FILE_NAME, "rw")) {
-            byte dataBuffer[] = new byte[1024];
+            byte dataBuffer[] = new byte[8192];
             int bytesRead;
             while ((bytesRead = urlInputStream.read(dataBuffer, 0, 1024)) != -1) {
                 downloadedFileSize += bytesRead;

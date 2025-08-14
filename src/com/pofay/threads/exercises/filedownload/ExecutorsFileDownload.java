@@ -7,14 +7,18 @@ import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
-public class MultiThreadedFileDownload {
+public class ExecutorsFileDownload {
 
     // Main Download logic is from https://www.baeldung.com/java-download-file
     private static String FILE_URL = "https://milkov.tech/assets/psd.pdf";
     private static String FILE_NAME = "./resources/A Philosophy of Software Design.pdf";
 
-    public static void main(String[] args) throws URISyntaxException, IOException, InterruptedException {
+    public static void main(String[] args)
+            throws URISyntaxException, IOException, InterruptedException, ExecutionException {
 
         final var url = new URI(FILE_URL).toURL();
         final var httpConnection = (HttpURLConnection) url.openConnection();
@@ -27,40 +31,38 @@ public class MultiThreadedFileDownload {
         outputFile.setLength(fileSize);
         outputFile.close();
 
-        int threadCount = 6;
+        int threadCount = 4;
+        final var executor = Executors.newFixedThreadPool(threadCount);
+        final var futures = new ArrayList<Future<?>>();
         int chunkSize = (int) fileSize / threadCount;
-        final var threads = new ArrayList<DownloadThread>();
-
-        
-        for (var i = 0; i < threadCount; i++) {
-            long start = i * chunkSize;
-            long end = (i == threadCount - 1) ? fileSize - 1 : (i + 1) * chunkSize - 1;
-            threads.add(new DownloadThread(FILE_URL, FILE_NAME, start, end));
-        }
 
         long startTime = System.currentTimeMillis();
 
-        for (var thread : threads) {
-            thread.start();
+        for (var i = 0; i < threadCount; i++) {
+            long start = i * chunkSize;
+            long end = (i == threadCount - 1) ? fileSize - 1 : (i + 1) * chunkSize - 1;
+            final var downloadTask = new DownloadTask(FILE_URL, FILE_NAME, start, end);
+            futures.add(executor.submit(downloadTask));
         }
 
-        for (var thread : threads) {
-            thread.join();
+        for (var future : futures) {
+            future.get();
         }
 
+        executor.shutdown();
         long endTime = System.currentTimeMillis();
         long duration = endTime - startTime;
         System.out.println(duration);
     }
 
-    public static class DownloadThread extends Thread {
+    public static class DownloadTask implements Runnable {
 
         private String fileURL;
         private String outputPath;
         private long startByte;
         private long endingByte;
 
-        public DownloadThread(String fileURL, String outputPath, long startingByte, long endingByte) {
+        public DownloadTask(String fileURL, String outputPath, long startingByte, long endingByte) {
             this.fileURL = fileURL;
             this.outputPath = outputPath;
             this.startByte = startingByte;
