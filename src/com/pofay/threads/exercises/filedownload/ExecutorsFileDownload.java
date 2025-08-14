@@ -31,7 +31,7 @@ public class ExecutorsFileDownload {
         outputFile.setLength(fileSize);
         outputFile.close();
 
-        int threadCount = 4;
+        int threadCount = 6;
         final var executor = Executors.newFixedThreadPool(threadCount);
         final var futures = new ArrayList<Future<?>>();
         int chunkSize = (int) fileSize / threadCount;
