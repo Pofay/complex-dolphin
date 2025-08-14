@@ -15,23 +15,28 @@ public class SingleThreadedFileDownload {
 
     public static void main(String[] args) throws URISyntaxException, IOException {
 
-        // For now print out the file size
         final var url = new URI(FILE_URL).toURL();
         final var httpConnection = (HttpURLConnection) url.openConnection();
         httpConnection.setRequestMethod("HEAD");
-
         final var fileSize = httpConnection.getContentLengthLong();
+
+        long downloadedFileSize = 0;
 
         System.out.println("File size is: " + fileSize);
 
-        // Then download the file
         try (final var urlInputStream = new BufferedInputStream(url.openStream());
                 FileOutputStream fileOutputStream = new FileOutputStream(FILE_NAME)) {
             byte dataBuffer[] = new byte[1024];
             int bytesRead;
             while ((bytesRead = urlInputStream.read(dataBuffer, 0, 1024)) != -1) {
+                downloadedFileSize += bytesRead;
+                final int currentProgress = (int) ((((double) downloadedFileSize) / ((double) fileSize))
+                        * 100);
+
                 fileOutputStream.write(dataBuffer, 0, bytesRead);
+                System.out.println("Download Progress: " + currentProgress + "%");
             }
+            System.out.println("Done Downloading File.");
         } catch (IOException e) {
             // handle exception
         }
