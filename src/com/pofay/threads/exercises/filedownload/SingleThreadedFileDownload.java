@@ -1,8 +1,8 @@
 package com.pofay.threads.exercises.filedownload;
 
 import java.io.BufferedInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -22,10 +22,16 @@ public class SingleThreadedFileDownload {
 
         long downloadedFileSize = 0;
 
+        final var outputFile = new RandomAccessFile(FILE_NAME, "rw");
+        outputFile.setLength(fileSize);
+        outputFile.close();
+
         System.out.println("File size is: " + fileSize);
 
+        long startTime = System.currentTimeMillis();
+
         try (final var urlInputStream = new BufferedInputStream(url.openStream());
-                FileOutputStream fileOutputStream = new FileOutputStream(FILE_NAME)) {
+                final var raf = new RandomAccessFile(FILE_NAME, "rw")) {
             byte dataBuffer[] = new byte[1024];
             int bytesRead;
             while ((bytesRead = urlInputStream.read(dataBuffer, 0, 1024)) != -1) {
@@ -33,7 +39,7 @@ public class SingleThreadedFileDownload {
                 final int currentProgress = (int) ((((double) downloadedFileSize) / ((double) fileSize))
                         * 100);
 
-                fileOutputStream.write(dataBuffer, 0, bytesRead);
+                raf.write(dataBuffer, 0, bytesRead);
                 System.out.println("Download Progress: " + currentProgress + "%");
             }
             System.out.println("Done Downloading File.");
@@ -41,6 +47,10 @@ public class SingleThreadedFileDownload {
             // handle exception
         }
 
+        long endTime = System.currentTimeMillis();
+        long duration = endTime - startTime;
+
+        System.out.println(duration);
     }
 
 }
